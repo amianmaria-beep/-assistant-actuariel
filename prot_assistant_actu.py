@@ -1,3 +1,4 @@
+#Essai streamlit
 import streamlit as st
 
 # 1. TITRES ET TEXTES
@@ -36,7 +37,7 @@ texte = st.text_area("Colle un extrait de rapport ici :")
 if texte:
     st.write("Nombre de mots :", len(texte.split()))
 
-# 7. UPLOAD DE FICHIER (très utile pour le RAG !)
+# 7. UPLOAD DE FICHIER ( utile pour le RAG)
 fichier = st.file_uploader("Charge un document :", type=["pdf", "txt"])
 if fichier:
     st.write("Fichier chargé :", fichier.name)
