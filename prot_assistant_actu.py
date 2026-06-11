@@ -54,3 +54,6 @@ page = st.sidebar.selectbox("Choisir une section :",
     ["Accueil", "Indicateurs", "Résumé de portefeuille", "Reporting"])
 
 st.write("Tu es sur la page :", page)
+
+#test des API 
+
