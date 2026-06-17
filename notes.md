@@ -10,8 +10,18 @@ On la protège en créant un fichier special .env dans lequel on la met et le fi
 
 # CREATION DE SOUS-DOSSIERS 
 La creation de sous-dossiers permettra de structurer le projet afin qu'il soit lisible . Pour l'instant je crée **3 dossiers**:
--**src** pour le code source 
--**docs** pour tous les documents actuariels que j'aurai à uploader (pour le RAG)
--**tests** pour mes fichiers test
+
+-  **src** pour le code source 
+-  **docs** pour tous les documents actuariels que j'aurai à uploader (pour le RAG)
+-  **tests** pour mes fichiers test
 (fichier test : un code pour evaluer et valider mon assistant)
 
+# INSTALLATION DE LA BIBLIOTHEQUE **ANTHROPIC** et **PYTHON-DOTENV**
+Anthropic est la bibliothèque qui permet de parler à l'API depuis python
+python-dotenv est la bibliothèque qui me permet de lire automatiquement mon fichie .env pour récuperer ma clé API
+
+# CREATION D'UN README
+Le readme doit repondre à 3 questions importantes pour l'instant :
+- C'est quoi le projet ?
+- Quelles sont les differentes technologies que j'ai utilisé?
+- Quelles sont les differentes étapes de l'organisation de mon projet?
