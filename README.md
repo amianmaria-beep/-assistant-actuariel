@@ -17,3 +17,7 @@ Mise en place d'un assistant actuariel capable d'expliquer les indicateurs actua
 - Appel d'API via un script python
 - Gestion et test des paramètres de la requete
 - Gestion des erreurs potentiel pouvant survenir lors de l'appel de l'API 
+- Recherche sur les différents indicateurs actuariels
+- Reflexion sur la personnalité et les limites de l'assistant 
+- Ecriture du prompt système 
+- Amelioration du prompt système après les differents tests 
