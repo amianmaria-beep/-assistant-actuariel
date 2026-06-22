@@ -167,3 +167,29 @@ C'est une question piège pour savoir s'il me dira que c'est pas suffisant et s'
 **Question 6**: quais ce q'un mage de risq ?
 Je mets expressement des fautes dans ma question pour savoir comment reagira mon assistant 
 **Resultat**:RAS il donne ce qu'il pense etre juste et demande la confirmation de l'utilisateur .
+
+# INTERFACE STREAMLIT
+## Intégration API dans Streamlit
+
+J'ai créé le fichier chatbot_v1.py qui est le debut de la vraie interface 
+de mon assistant. Contrairement à test_api.py qui s'executait dans le terminal,
+chatbot_v1.py s'affiche dans le navigateur grâce à Streamlit.
+
+## Ce que j'ai appris
+- st.set_page_config : permet de configurer le titre et la mise en page de l'app
+- st.chat_input : zone de saisie qui s'affiche en bas de page comme un vrai chat,
+  envoie le message quand on appuie sur Entrée sans avoir besoin d'un bouton séparé
+- st.chat_message : affiche les messages avec des bulles différenciées 
+  pour l'utilisateur et l'assistant
+- st.spinner : affiche un indicateur de chargement pendant l'appel API
+- st.sidebar : panneau latéral gauche pour les informations du projet
+
+## CSS dans Streamlit
+On peut personnaliser l'interface avec du CSS via st.markdown avec 
+unsafe_allow_html=True. J'ai modifié la couleur de la sidebar, 
+du fond de page et de la zone de saisie.
+
+## Bug rencontré et corrigé
+Le message "Veuillez écrire une question" s'affichait au lancement 
+à cause du else relié au if question. En supprimant ce else, 
+le message n'apparaît plus qu'au bon moment.
