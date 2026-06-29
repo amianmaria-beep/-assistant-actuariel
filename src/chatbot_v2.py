@@ -36,6 +36,13 @@ st.markdown("""
         border-radius: 15px;
         padding: 10px;
     }
+    [data-testid="stSidebar"] .stButton button {
+     background-color: #C9A84C;
+     : white;
+      border: none;
+     rder-radius: 8px;
+     idth: 100%;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -47,6 +54,21 @@ with st.sidebar:
     st.markdown("**Domaine** : Actuariat ")
     st.markdown("---")
     st.caption("Projet de stage — Juin 2026")
+    if st.button("🗑 Effacer la conversation"):
+      st.session_state.confirmer_effacement = True
+
+    if st.session_state.get("confirmer_effacement", False):
+      st.sidebar.warning("Êtes-vous sûr ? Cette action est irréversible.")
+      col1, col2 = st.sidebar.columns(2)
+      with col1:
+          if st.button("Oui"):
+                st.session_state.messages = []
+                st.session_state.confirmer_effacement = False
+                st.rerun()
+      with col2:
+         if st.button("Non"):
+                st.session_state.confirmer_effacement = False
+                st.rerun()
     st.markdown("---")
 
 
