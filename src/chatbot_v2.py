@@ -23,7 +23,7 @@ st.markdown("""
         border-color: #2E4A7A;
     }
     h1 {
-        color: ##2E4A7A;
+        color: #2E4A7A;
     }
     /* Fond de la page principale */
     [data-testid="stAppViewContainer"] {
@@ -90,6 +90,11 @@ st.markdown(f"""
 # Charger la clé API depuis le fichier .env
 load_dotenv()
 
+# Initialisation de la mémoire de conversation
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+
 # prompt système
 prompt_systeme="""-Ton role:Tu es principalement destiné à des actuaires ou des étudiants en étude d'actuariat. Tu les aideras dans leur taches et leur donneras des informations sur des concepts actuariels.
 
@@ -107,51 +112,33 @@ prompt_systeme="""-Ton role:Tu es principalement destiné à des actuaires ou de
 - Citation des sources: à chaque réponse sur un concept ou une règle,Tu dois indiquer l'organisme ou la source de référence (EIOPA, ACPR, Institut des Actuaires et ) pour permettre à l'utilisateur d'approfondir s'il le souhaite.Aussi pour une question spécifique (C'est quoi l'utilité de X),tu repondra de façon prioritaire à sa question.
   """
 
-
-# Zone de saisie utilisateur
-question = st.chat_input("Votre question :")
-
-# Bouton envoyer
-if question:
-    # Afficher la question de l'utilisateur
-    with st.chat_message("user"):
-        st.write(question)
-
-    if question.strip() == "":
-        st.warning("Veuillez écrire une question avant d'envoyer.")
-    else:
-        with st.spinner("Réponse en cours..."):
+# Gestion de la nouvelle question
+if prompt := st.chat_input("Votre question :"):
+    st.session_state.messages.append({"role": "user", "content": prompt})
     
-            try :
-            # Créer le client Anthropic
-                client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    with st.spinner("Réponse en cours..."):
+        try:
+            client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+            response = client.messages.create(
+                model="claude-sonnet-4-6",
+                max_tokens=1500,
+                temperature=0,
+                system=prompt_systeme,
+                messages=st.session_state.messages
+            )
+            st.session_state.messages.append({
+                "role": "assistant",
+                "content": response.content[0].text
+            })
+        except anthropic.AuthenticationError:
+            st.error("Clé API invalide.")
+        except anthropic.APIConnectionError:
+            st.error("Connexion impossible.")
+        except anthropic.RateLimitError:
+            st.error("Limite de crédit atteinte.")
+        except Exception as e:
+            st.error(f"Erreur : {e}")
 
-            # Envoyer une question à Claude
-                response = client.messages.create(
-                    model="claude-sonnet-4-6",
-                    max_tokens=1500,
-                    temperature=0,
-                    system=prompt_systeme,
-                    messages=[
-                    {"role": "user", "content": question}
-
-                    ]
-                )
-
-            # Afficher la réponse
-                with st.chat_message("assistant"):
-                  st.markdown(response.content[0].text)
-
-            #Gestion des erreurs
-            except anthropic.AuthenticationError:
-                print("Erreur : clé API invalide ou manquante. Vérifie le fichier .env")
-
-            except anthropic.APIConnectionError:
-                print("Erreur : impossible de se connecter au serveur. Vérifie la connexion internet.")
-
-            except anthropic.RateLimitError:
-              print("Erreur : limite de crédit atteinte. Vérifie ton compte Anthropic.")
-
-            except Exception as e:
-               print(f"Erreur inattendue : {e}")
-
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])

@@ -193,3 +193,15 @@ du fond de page et de la zone de saisie.
 Le message "Veuillez écrire une question" s'affichait au lancement 
 à cause du else relié au if question. En supprimant ce else, 
 le message n'apparaît plus qu'au bon moment.
+
+## st.session_state
+Tiroir spécial de Streamlit qui conserve les données entre les 
+réexécutions. Sans lui, l'historique repart à zéro à chaque interaction.
+
+## Bug résolu — ordre d'affichage
+La boucle for doit être APRÈS le if prompt. Si elle est avant, 
+il y a un conflit d'affichage qui efface les messages précédents.
+
+## Structure qui fonctionne
+1. if prompt := st.chat_input() : traite et sauvegarde dans session_state
+2. for msg in st.session_state.messages :affiche tout l'historique

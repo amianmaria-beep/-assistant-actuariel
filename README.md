@@ -25,3 +25,5 @@ Mise en place d'un assistant actuariel capable d'expliquer les indicateurs actua
 - Intégration de l'API Anthropic dans l'interface
 - Personnalisation visuelle (CSS, sidebar, message de bienvenue)
 - Gestion des erreurs et du spinner dans l'interface
+- Ajout de la mémoire de conversation avec st.session_state (chatbot_v2.py)
+- Résolution d'un bug d'affichage lié à l'ordre des composants Streamlit
