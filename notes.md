@@ -205,3 +205,39 @@ il y a un conflit d'affichage qui efface les messages précédents.
 ## Structure qui fonctionne
 1. if prompt := st.chat_input() : traite et sauvegarde dans session_state
 2. for msg in st.session_state.messages :affiche tout l'historique
+
+# RAG (Retrieval Augmented Generation)
+Il va permettre a l'assistant d'avoir accès à des documents internes et baser ces reponses sur ceux-ci lorsqu'il lui sera demandé.
+
+Cette methode passe par plusieurs etapes:
+## Les chunks
+Lorsque les  documents seront uploadé vu que le LLM ne peux pas lire des longs documents ,ils seront découpé en plusieurs morceaux qui ont du sens appélés *Chunks*
+
+## Les embeddings 
+Le LLM ne comprends que les chiffres et pas les mots vu que c'est un reseau de neurones. Les Chunks seront donc transformé en vecteurs que le LLM pourra comprendre.
+
+## La base vectorielle et recherche semantique
+Les embeddings seront ensuite rangés dans une base appélée *base vectorielle* qui permettra de comparer le vecteur de la question aux differents vecteurs de ceux de la base vectorielle et retenir ceux qui sont les plus proches. C'est ainsi que le LLM comprendra dans quelle Chunk se servir afin d'avoir la reponse à la question.
+
+## Premier RAG fonctionnel
+
+### Bibliothèques installées
+- langchain-community : charge les documents PDF
+- langchain-text-splitters : découpe le texte en chunks
+- faiss-cpu : stocke et recherche les vecteurs (créé par Facebook)
+- sentence-transformers + langchain-huggingface : transforme les 
+  chunks en vecteurs (gratuit, fonctionne en local, supporte le français)
+
+### Ce qu'on a fait
+1. Chargé le PDF ACPR-AMF 2025 (24 pages → 59 chunks)
+2. Créé la base vectorielle FAISS avec de vrais embeddings HuggingFace
+3. Testé la recherche sémantique : une question → 3 chunks proches retrouvés
+4. Connecté au LLM Claude : les chunks deviennent le contexte de la réponse
+
+### Observation importante
+Le LLM a répondu honnêtement "pas disponible" quand le bon chunk 
+n'était pas dans les résultats. C'est le comportement attendu — 
+il ne doit pas inventer.
+
+### La chaîne RAG complète
+PDF ->chunks -> vecteurs FAISS ->recherche sémantique -> contexte LLM ->réponse

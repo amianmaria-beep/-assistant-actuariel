@@ -27,3 +27,4 @@ Mise en place d'un assistant actuariel capable d'expliquer les indicateurs actua
 - Gestion des erreurs et du spinner dans l'interface
 - Ajout de la mémoire de conversation avec st.session_state (chatbot_v2.py)
 - Résolution d'un bug d'affichage lié à l'ordre des composants Streamlit
+- Implémentation du RAG : chargement PDF, découpage en chunks,base vectorielle FAISS, embeddings HuggingFace, connexion au LLM
