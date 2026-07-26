@@ -24,3 +24,22 @@
 
      - Avec temperature=0,lorsqu'on pose la question plusieurs fois a Claude ,ces reponses sont les memes à seulement quelques mots de differences ,on peut donc dire qu'il est assez prévisible .Ici il agit comme un professeur ,des reponses précises.
      - Avec temperature=1,lorsqu'on pose la question plusieurs fois a Claude ,ces reponses sont plus fluides et variée ,comme s'il prend plus de liberté dans le choix de ses mots.
+
+# TEST RAG (5 questions )
+J'utilise un rapport de l'AMF trouvé sur Google 
+Q1 : Combien de publicités analysées en 2025 ?
+- Réponse LLM : 4 543 publicités (Correct)
+
+Q2 : Qu'est-ce que la campagne BaWé ?
+- Réponse LLM : Complète et précise 
+
+Q3 : Combien de contrôles coordonnés en 2025 ?
+- Réponse LLM : Incorrecte  (réponse correcte : 30 contrôles)
+- Cause : le bon chunk n'a pas été retrouvé par la recherche sémantique
+
+Q4 : Qu'est-ce que ABE Infoservice ?
+- Réponse LLM : excellente et très complète 
+
+Q5:Quels sont les risques liés aux influenceurs sur les réseaux sociaux ?
+- Réponse LLM :reponse complète et bien structurée 
+

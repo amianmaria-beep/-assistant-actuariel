@@ -40,7 +40,7 @@ vectorstore = FAISS.from_documents(chunks, embeddings)
 print(f"\nBase vectorielle créée avec {vectorstore.index.ntotal} vecteurs")
 
 # Test de recherche sémantique
-question = "Combien de sites non autorisés ont été ajoutés aux listes noires en 2025 ?"
+question = "Quels sont les risques liés aux influenceurs sur les réseaux sociaux ?"
 docs_proches = vectorstore.similarity_search(question, k=3)
 
 print(f"\n--- Chunks les plus proches pour la question ---")
