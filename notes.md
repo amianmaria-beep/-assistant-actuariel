@@ -242,6 +242,34 @@ il ne doit pas inventer.
 ### La chaîne RAG complète
 PDF ->chunks -> vecteurs FAISS ->recherche sémantique -> contexte LLM ->réponse
 
-# REPORTINGS 
+# FINALISATION DU PROTOTYPE
 Je crée le fichier final du prototype de mon assistant *app.py*
 Dans ce code on va separer les trois fonctionnalités de l'assistant pour rendre l'interface fluide à utiliser . Ainsi pour chacune des ses fonctions ,un prompt bien defini sera fait afin de reguler les agissements de l'assistant
+
+# TEST DES LIMITES DU PROTOTYPE ET AMELIORATION
+## Test des fonctions de l'assistant 
+
+### Test 1 : Fonction 2 sans document chargé
+Question posée : "Combien de publicités ont été analysées en 2025 ?"
+Résultat : L'assistant refuse de répondre et invite à charger un document 
+
+### Test 2 : Document volumineux (7MB - 170 pages)
+Résultat : 529 chunks créés, indexation réussie sans erreur
+L'interface reste stable pendant l'indexation 
+
+### Test 3 : Question sur un grand document (mémoire actuariel 170 pages)
+Question : "De quoi parle ce mémoire et qui l'a écrit ?"
+Résultat : Sujet bien identifié. 
+Auteur non trouvé : l'assistant l'indique honnêtement sans inventer ✅
+####  Observation importante sur le RAG
+La formulation de la question influence la qualité des résultats.
+Première question "qui l'a écrit ?" → auteur non trouvé
+Deuxième tentative :auteur trouvé (Mulah MORIAH)
+Conclusion : le RAG est sensible à la façon dont on pose la question.
+
+### Test 4 : Changement de fonction en pleine conversation
+Résultat : La conversation repart bien de zéro à chaque changement 
+de fonction 
+
+## Amelioration de l'ergonomie 
+- Rendre clairement visible les trois fonctions et la sélection est évidente avec le bouton rouge et le "Mode actif" en dessous

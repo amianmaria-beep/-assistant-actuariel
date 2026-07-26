@@ -21,8 +21,8 @@ st.markdown("""
     [data-testid="stSidebar"] {
         background-color: #2E4A7A;
     }
-    [data-testid="stSidebar"] * {
-        color: #FFFFFF !important;
+    [data-testid="stSidebar"] *:not(select):not(option):not(input) {
+     color: #FFFFFF !important;
     }
     [data-testid="stChatInput"] {
         border-color: #2E4A7A;
@@ -85,13 +85,13 @@ with st.sidebar:
 
     # NOUVEAU — Sélecteur de fonction
     st.markdown("**Choisir une fonction**")
-    fonction = st.selectbox(
-        "",
-        [
-            "Fonction 1 — Indicateurs actuariels",
-            "Fonction 2 — Analyse de documents",
-            "Fonction 3 — Aide au reporting"
-        ]
+    fonction = st.radio(
+          "",
+         [
+         "Fonction 1 — Indicateurs actuariels",
+         "Fonction 2 — Analyse de documents",
+         "Fonction 3 — Aide au reporting"
+         ]
     )
     st.markdown(f"""
     <div style='background-color:#C9A84C;color:white;padding:6px 12px;
