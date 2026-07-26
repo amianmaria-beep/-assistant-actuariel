@@ -241,3 +241,7 @@ il ne doit pas inventer.
 
 ### La chaîne RAG complète
 PDF ->chunks -> vecteurs FAISS ->recherche sémantique -> contexte LLM ->réponse
+
+# REPORTINGS 
+Je crée le fichier final du prototype de mon assistant *app.py*
+Dans ce code on va separer les trois fonctionnalités de l'assistant pour rendre l'interface fluide à utiliser . Ainsi pour chacune des ses fonctions ,un prompt bien defini sera fait afin de reguler les agissements de l'assistant

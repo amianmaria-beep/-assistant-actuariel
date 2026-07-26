@@ -31,3 +31,6 @@ Mise en place d'un assistant actuariel capable d'expliquer les indicateurs actua
 - Test du RAG avec un doc PDF (5 questions posées, 4/5 correctes)
 - Intégration du RAG dans Streamlit : upload PDF depuis la sidebar
 - Indexation automatique avec FAISS et HuggingFace et affichage des sources dans Streamlit
+- Création du fichier final app.py intégrant les 3 fonctions de l'assistant
+- Sélecteur de fonction dans la sidebar avec mode actif visible
+- Réinitialisation automatique du chat lors du changement de fonction
