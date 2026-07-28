@@ -248,7 +248,7 @@ Dans ce code on va separer les trois fonctionnalités de l'assistant pour rendre
 
 # TEST DES LIMITES DU PROTOTYPE ET AMELIORATION
 ## Test des fonctions de l'assistant 
-
+## Fontion 2
 ### Test 1 : Fonction 2 sans document chargé
 Question posée : "Combien de publicités ont été analysées en 2025 ?"
 Résultat : L'assistant refuse de répondre et invite à charger un document 
@@ -270,6 +270,12 @@ Conclusion : le RAG est sensible à la façon dont on pose la question.
 ### Test 4 : Changement de fonction en pleine conversation
 Résultat : La conversation repart bien de zéro à chaque changement 
 de fonction 
+
+## Fonction 3 : Aide au reporting 
+Je vais vérifier si l'aide au reporting marche réellement 
+Ma question :*Aide-moi à rédiger l'introduction d'un rapport ORSA pour une compagnie d'assurance non-vie*
+Résultat : Introduction complète et conforme Solvabilité II générée,avec sections structurées et points d'attention pour validation.
+
 
 ## Amelioration de l'ergonomie 
 - Rendre clairement visible les trois fonctions et la sélection est évidente avec le bouton rouge et le "Mode actif" en dessous

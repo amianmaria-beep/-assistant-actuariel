@@ -34,3 +34,5 @@ Mise en place d'un assistant actuariel capable d'expliquer les indicateurs actua
 - Création du fichier final app.py intégrant les 3 fonctions de l'assistant
 - Sélecteur de fonction dans la sidebar avec mode actif visible
 - Réinitialisation automatique du chat lors du changement de fonction
+- Test des differentes fonctions de l'assistant
+- Amelioration de l'experience d'upload de fichier 

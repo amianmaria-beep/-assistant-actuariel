@@ -61,6 +61,10 @@ st.markdown("""
     border-radius: 8px;
     border: 2px solid #C9A84C;
 }
+[data-testid="stFileUploader"] button {
+    color: #1B3A6B !important;
+    background-color: #FFFFFF !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -110,26 +114,31 @@ with st.sidebar:
     # Upload PDF uniquement pour Fonction 2
     if "Fonction 2" in fonction:
         st.markdown("**Charger un document**")
-        uploaded_file = st.file_uploader("Uploader un PDF", type="pdf")
-
-        if uploaded_file is not None:
-            with st.spinner("Indexation en cours..."):
-                with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-                    tmp.write(uploaded_file.read())
-                    tmp_path = tmp.name
-                loader = PyPDFLoader(tmp_path)
-                documents = loader.load()
-                splitter = RecursiveCharacterTextSplitter(
-                    chunk_size=1000, chunk_overlap=200
-                )
-                chunks = splitter.split_documents(documents)
-                embeddings = HuggingFaceEmbeddings(
-                    model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
-                )
-                st.session_state.vectorstore = FAISS.from_documents(chunks, embeddings)
-                st.success(f"✓ {len(chunks)} chunks indexés")
-        st.markdown("---")
-
+        uploaded_files = st.file_uploader("Uploader un ou plusieurs PDF", type="pdf", accept_multiple_files=True)
+        if uploaded_files:
+            # Réindexer seulement si les fichiers ont changé
+            noms_fichiers = [f.name for f in uploaded_files]
+            if noms_fichiers != st.session_state.get("fichiers_charges", []):
+                with st.spinner("Chargement en cours..."):
+                  all_chunks = []
+                  for uploaded_file in uploaded_files:
+                     with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+                         tmp.write(uploaded_file.read())
+                         tmp_path = tmp.name
+                     loader = PyPDFLoader(tmp_path)
+                     documents = loader.load()
+                     splitter = RecursiveCharacterTextSplitter(
+                         chunk_size=1000, chunk_overlap=200
+                     ) 
+                     chunks = splitter.split_documents(documents)
+                     all_chunks.extend(chunks)
+                  embeddings = HuggingFaceEmbeddings(
+                      model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+                    )
+                  st.session_state.vectorstore = FAISS.from_documents(all_chunks, embeddings)
+                  st.session_state.fichiers_charges = noms_fichiers
+                  st.success("✓ Document(s) chargé(s) avec succès")   
+    st.markdown("---")
     # Bouton effacer
     if st.button("🗑 Effacer la conversation"):
         st.session_state.confirmer_effacement = True
@@ -238,8 +247,11 @@ if prompt := st.chat_input("Votre question :"):
 
             # RAG uniquement pour Fonction 2
             if "Fonction 2" in st.session_state.fonction and st.session_state.vectorstore:
-                docs_proches = st.session_state.vectorstore.similarity_search(prompt, k=3)
-                contexte = "\n\n".join([doc.page_content for doc in docs_proches])
+                docs_proches = st.session_state.vectorstore.similarity_search(prompt, k=8)
+                contexte = "\n\n".join([
+                     f"[Source: {doc.metadata.get('source', 'Document')}]\n{doc.page_content}" 
+                     for doc in docs_proches
+                ])
                 messages_api = st.session_state.messages[:-1] + [
                     {"role": "user", "content": f"Contexte documentaire :\n{contexte}\n\nQuestion : {prompt}"}
                 ]
