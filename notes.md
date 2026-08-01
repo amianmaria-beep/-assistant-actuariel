@@ -279,3 +279,13 @@ Résultat : Introduction complète et conforme Solvabilité II générée,avec s
 
 ## Amelioration de l'ergonomie 
 - Rendre clairement visible les trois fonctions et la sélection est évidente avec le bouton rouge et le "Mode actif" en dessous
+### Amélioration : upload multiple de documents
+- k augmenté à 8 pour couvrir plusieurs documents
+- Source du document ajoutée dans le contexte
+- Test avec 3 documents : résultats corrects 
+
+### Ajout d'un historique de conversation 
+
+Chaque conversation est sauvegardée avec un nom et une date
+L'utilisateur peut voir la liste de ses conversations passées
+Il peut en sélectionner une pour la continuer

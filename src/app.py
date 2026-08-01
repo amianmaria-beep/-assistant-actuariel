@@ -78,7 +78,12 @@ if "vectorstore" not in st.session_state:
     st.session_state.vectorstore = None
 if "fonction" not in st.session_state:
     st.session_state.fonction = "Fonction 1 — Indicateurs actuariels"
-
+if "fichiers_charges" not in st.session_state:
+    st.session_state.fichiers_charges = []
+if "historique_conversations" not in st.session_state:
+    st.session_state.historique_conversations = {}
+if "conversation_id" not in st.session_state:
+    st.session_state.conversation_id = None
 # Sidebar
 with st.sidebar:
     st.title("Assistant Actuariel")
@@ -103,12 +108,25 @@ with st.sidebar:
     Mode actif : {fonction.split("—")[1].strip()}
     </div>
     """, unsafe_allow_html=True)
+    # Réinitialiser si changement de fonction
     if fonction != st.session_state.fonction:
+        # Sauvegarder la conversation en cours avant de changer
+        if st.session_state.messages:
+            conv_id = st.session_state.conversation_id or datetime.now().strftime("%Y%m%d_%H%M%S")
+            premiere_question = st.session_state.messages[0]['content'][:40]
+            date_heure = datetime.now().strftime("%d/%m %H:%M")
+            titre = f"{premiere_question}... — {date_heure}"
+            st.session_state.historique_conversations[conv_id] = {
+                'titre': titre,
+                'messages': st.session_state.messages.copy(),
+                'fonction': st.session_state.fonction
+            }
         st.session_state.messages = []
         st.session_state.vectorstore = None
+        st.session_state.fichiers_charges = []
         st.session_state.fonction = fonction
+        st.session_state.conversation_id = None
         st.rerun()
-    st.session_state.fonction = fonction
     st.markdown("---")
 
     # Upload PDF uniquement pour Fonction 2
@@ -138,9 +156,45 @@ with st.sidebar:
                   st.session_state.vectorstore = FAISS.from_documents(all_chunks, embeddings)
                   st.session_state.fichiers_charges = noms_fichiers
                   st.success("✓ Document(s) chargé(s) avec succès")   
-    st.markdown("---")
+        st.markdown("---")
+
+     # Bouton nouvelle conversation
+    if st.button("✏️ Nouvelle conversation"):
+        if st.session_state.messages:
+            conv_id = st.session_state.conversation_id or datetime.now().strftime("%Y%m%d_%H%M%S")
+            premiere_question = st.session_state.messages[0]['content'][:40]
+            date_heure = datetime.now().strftime("%d/%m %H:%M")
+            titre = f"{premiere_question}... — {date_heure}"
+            st.session_state.historique_conversations[conv_id] = {
+                'titre': titre,
+                'messages': st.session_state.messages.copy(),
+                'fonction': st.session_state.fonction
+            }
+        st.session_state.messages = []
+        st.session_state.conversation_id = None
+        st.rerun()
+
+    # Historique des conversations
+    if st.session_state.historique_conversations:
+       st.markdown("**Historique**")
+       for conv_id, conv_data in list(st.session_state.historique_conversations.items())[::-1]:
+           date_heure = conv_data['titre'].split('—')[-1].strip()
+           titre_court = conv_data['titre'].split('...')[0].strip()
+           st.caption(date_heure)
+           col1, col2 = st.columns([4, 1])
+           with col1:
+              if st.button(f"💬 {titre_court[:25]}...", key=f"hist_{conv_id}"):
+                 st.session_state.messages = conv_data['messages'].copy()
+                 st.session_state.conversation_id = conv_id
+                 st.rerun()
+           with col2:
+              if st.button("🗑", key=f"del_{conv_id}"):
+                 del st.session_state.historique_conversations[conv_id]
+                 st.rerun()
+       st.markdown("---")
+
     # Bouton effacer
-    if st.button("🗑 Effacer la conversation"):
+    if st.button("Effacer la conversation"):
         st.session_state.confirmer_effacement = True
 
     if st.session_state.get("confirmer_effacement", False):
@@ -149,6 +203,7 @@ with st.sidebar:
         with col1:
             if st.button("Oui"):
                 st.session_state.messages = []
+                st.session_state.conversation_id = None
                 st.session_state.confirmer_effacement = False
                 st.rerun()
         with col2:
@@ -265,10 +320,25 @@ if prompt := st.chat_input("Votre question :"):
                 system=prompt_systeme,
                 messages=messages_api
             )
+            reponse_texte = response.content[0].text
             st.session_state.messages.append({
                 "role": "assistant",
-                "content": response.content[0].text
+                "content": reponse_texte
             })
+
+            # Sauvegarder automatiquement la conversation
+            if len(st.session_state.messages) >= 2:
+                if st.session_state.conversation_id is None:
+                    st.session_state.conversation_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+                conv_id = st.session_state.conversation_id
+                premiere_question = st.session_state.messages[0]['content'][:40]
+                date_heure = datetime.now().strftime("%d/%m %H:%M")
+                titre = f"{premiere_question}... — {date_heure}"
+                st.session_state.historique_conversations[conv_id] = {
+                    'titre': titre,
+                    'messages': st.session_state.messages.copy(),
+                    'fonction': st.session_state.fonction
+                }
 
         except anthropic.AuthenticationError:
             st.error("Clé API invalide.")
