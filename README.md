@@ -36,3 +36,6 @@ Mise en place d'un assistant actuariel capable d'expliquer les indicateurs actua
 - Réinitialisation automatique du chat lors du changement de fonction
 - Test des differentes fonctions de l'assistant
 - Amelioration de l'experience d'upload de fichier 
+- Mise en place d'un historique 
+- Mise en place d'un cache pour accélérer les interactions 
+- Support des fichiers Excel en plus des PDF (tables actuarielles,matrices de sinistralité...)

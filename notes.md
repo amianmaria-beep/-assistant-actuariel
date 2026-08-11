@@ -286,6 +286,35 @@ Résultat : Introduction complète et conforme Solvabilité II générée,avec s
 
 ### Ajout d'un historique de conversation 
 
-Chaque conversation est sauvegardée avec un nom et une date
+L'idée est que chaque conversation est sauvegardée avec un nom et une date
 L'utilisateur peut voir la liste de ses conversations passées
-Il peut en sélectionner une pour la continuer
+Il peut en sélectionner une pour la continuer.
+J'ai donc procédé comme suit:
+- Sauvegarde automatique à chaque échange
+- Classement par date/heure (plus récent en premier)
+- Possibilité de supprimer une conversation
+- Possibilité de revenir sur une conversation passée
+
+### Affichage des sources 
+Permettre à l'utilisateur de savoir sur quel document parmi ces documents uploadés ,l'assistant se base pour donner les reponses
+
+### Mise en place d'un cache pour accélérer les interactions 
+
+Pour ce fait j'utilise @st.cache_resource qui permet de mettre en mémoire le resultat d'une fonction comme ça elle n'est exécutée qu'une seule fois au lieu de l'etre a chaque interaction 
+
+### Faciliter l'accès des fichiers déjà uploadés
+
+L'idée serait d' afficher dans la sidebar la liste des documents déjà indexés pendant la session, avec possibilité de les réutiliser sans ré-uploader.
+
+### Upload de fichier 
+Permettre l'upload de plusieurs formats de fichiers en utilisant **pip install openpyxl pandas**
+- L'assistant accepte maintenant les fichiers PDF et Excel (.xlsx, .xls)
+- Les feuilles Excel sont converties en texte structuré via pandas
+- Test réussi avec une table de mortalité TH002
+
+### Ajout questions prédéfinies
+- Boutons de raccourcis selon la fonction active
+- L'utilisateur peut cliquer et continuer la conversation
+
+### Ajout export conversation
+- Bouton téléchargement de la conversation en .txt

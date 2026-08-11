@@ -9,6 +9,10 @@ from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
 import tempfile
 
+@st.cache_resource
+def get_client():
+    return anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+
 # Configuration de la page
 st.set_page_config(
     page_title="Assistant Actuariel",
@@ -65,6 +69,9 @@ st.markdown("""
     color: #1B3A6B !important;
     background-color: #FFFFFF !important;
 }
+[data-testid="stFileUploaderFileName"] {
+    color: #1B3A6B !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -84,6 +91,12 @@ if "historique_conversations" not in st.session_state:
     st.session_state.historique_conversations = {}
 if "conversation_id" not in st.session_state:
     st.session_state.conversation_id = None
+if "sources" not in st.session_state:
+    st.session_state.sources = []
+if "documents_sauvegardes" not in st.session_state:
+    st.session_state.documents_sauvegardes = {}
+if "question_predifinie" not in st.session_state:
+    st.session_state.question_predifinie = None
 # Sidebar
 with st.sidebar:
     st.title("Assistant Actuariel")
@@ -132,7 +145,7 @@ with st.sidebar:
     # Upload PDF uniquement pour Fonction 2
     if "Fonction 2" in fonction:
         st.markdown("**Charger un document**")
-        uploaded_files = st.file_uploader("Uploader un ou plusieurs PDF", type="pdf", accept_multiple_files=True)
+        uploaded_files = st.file_uploader("Uploader des documents (PDF ou Excel)",type=["pdf", "xlsx", "xls"],accept_multiple_files=True)
         if uploaded_files:
             # Réindexer seulement si les fichiers ont changé
             noms_fichiers = [f.name for f in uploaded_files]
@@ -140,11 +153,22 @@ with st.sidebar:
                 with st.spinner("Chargement en cours..."):
                   all_chunks = []
                   for uploaded_file in uploaded_files:
-                     with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+                     with tempfile.NamedTemporaryFile(delete=False, suffix=f".{uploaded_file.name.split('.')[-1]}") as tmp:
                          tmp.write(uploaded_file.read())
                          tmp_path = tmp.name
-                     loader = PyPDFLoader(tmp_path)
-                     documents = loader.load()
+                     if uploaded_file.name.endswith((".xlsx", ".xls")):
+                         # Lire Excel avec pandas
+                         import pandas as pd
+                         df = pd.read_excel(tmp_path, sheet_name=None)
+                         texte_excel = ""
+                         for sheet_name, sheet_df in df.items():
+                                texte_excel += f"\n### Feuille : {sheet_name}\n"
+                                texte_excel += sheet_df.to_string(index=False)
+                         from langchain_core.documents import Document
+                         documents = [Document(page_content=texte_excel, metadata={"source": uploaded_file.name})] 
+                     else:
+                         loader = PyPDFLoader(tmp_path)
+                         documents = loader.load()
                      splitter = RecursiveCharacterTextSplitter(
                          chunk_size=1000, chunk_overlap=200
                      ) 
@@ -155,7 +179,13 @@ with st.sidebar:
                     )
                   st.session_state.vectorstore = FAISS.from_documents(all_chunks, embeddings)
                   st.session_state.fichiers_charges = noms_fichiers
-                  st.success("✓ Document(s) chargé(s) avec succès")   
+                  st.success("✓ Document(s) chargé(s) avec succès")  
+                  for uploaded_file in uploaded_files:
+                     st.session_state.documents_sauvegardes[uploaded_file.name] = uploaded_file
+        if st.session_state.documents_sauvegardes:
+           st.markdown("**Documents déjà chargés**")
+           for nom in st.session_state.documents_sauvegardes:
+              st.caption(f"📄 {nom}")
         st.markdown("---")
 
      # Bouton nouvelle conversation
@@ -289,13 +319,48 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# Gestion de la question
-if prompt := st.chat_input("Votre question :"):
+# Questions prédéfinies selon la fonction
+questions_predefinies = {
+    "Fonction 1 — Indicateurs actuariels": [
+        "Explique-moi le SCR",
+        "C'est quoi le Best Estimate ?",
+        "Comment calculer le ratio combiné ?",
+        "C'est quoi l'IBNR ?"
+    ],
+    "Fonction 2 — Analyse de documents": [
+        "Fais un résumé de ce document",
+        "Quels sont les chiffres clés ?",
+        "Quelles sont les conclusions principales ?"
+    ],
+    "Fonction 3 — Aide au reporting": [
+        "Rédige une introduction ORSA",
+        "Aide-moi à rédiger la section risques du SFCR",
+        "Quelles sont les exigences réglementaires ORSA ?"
+    ]
+}
+
+# Questions prédéfinies
+st.markdown("**Questions fréquentes :**")
+cols = st.columns(len(questions_predefinies[st.session_state.fonction]))
+for i, question in enumerate(questions_predefinies[st.session_state.fonction]):
+    with cols[i]:
+        if st.button(question, key=f"q_{i}"):
+            st.session_state.question_predifinie = question
+
+# Gérer les questions prédéfinies
+prompt = st.chat_input("Votre question :")
+
+# Si une question prédéfinie a été cliquée, elle prend le dessus
+if st.session_state.get("question_predifinie"):
+    prompt = st.session_state.question_predifinie
+    st.session_state.question_predifinie = None
+
+if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
 
     with st.spinner("Réponse en cours..."):
         try:
-            client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+            client = get_client()
 
             # Prompt selon la fonction choisie
             prompt_systeme = prompts[st.session_state.fonction]
@@ -307,6 +372,7 @@ if prompt := st.chat_input("Votre question :"):
                      f"[Source: {doc.metadata.get('source', 'Document')}]\n{doc.page_content}" 
                      for doc in docs_proches
                 ])
+                st.session_state.sources = docs_proches
                 messages_api = st.session_state.messages[:-1] + [
                     {"role": "user", "content": f"Contexte documentaire :\n{contexte}\n\nQuestion : {prompt}"}
                 ]
@@ -325,7 +391,7 @@ if prompt := st.chat_input("Votre question :"):
                 "role": "assistant",
                 "content": reponse_texte
             })
-
+            
             # Sauvegarder automatiquement la conversation
             if len(st.session_state.messages) >= 2:
                 if st.session_state.conversation_id is None:
@@ -353,3 +419,25 @@ if prompt := st.chat_input("Votre question :"):
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
+
+# Bouton export de la conversation
+if st.session_state.messages:
+    conversation_texte = ""
+    for msg in st.session_state.messages:
+        role = "Utilisateur" if msg["role"] == "user" else "Assistant"
+        conversation_texte += f"{role} :\n{msg['content']}\n\n{'—'*50}\n\n"
+    
+    st.download_button(
+        label="📥 Télécharger la conversation",
+        data=conversation_texte.encode("utf-8"),
+        file_name=f"conversation_{datetime.now().strftime('%Y%m%d_%H%M')}.txt",
+        mime="text/plain"
+    )
+
+# Afficher les sources si Fonction 2        
+if "Fonction 2" in st.session_state.fonction and st.session_state.get("sources"):
+    with st.expander("📄 Voir les extraits utilisés pour cette réponse"):
+        for i, doc in enumerate(st.session_state.sources):
+          st.markdown(f"**Extrait {i+1}**")
+          st.text(doc.page_content[:300])
+        st.markdown("---")
