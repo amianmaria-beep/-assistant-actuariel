@@ -9,7 +9,48 @@ Mise en place d'un assistant actuariel capable d'expliquer les indicateurs actua
 - Retrieval-Augmented Generation (RAG)
 - Streamlit 
 
-## ETAPES 
+## STRUCTURE DU PROJET 
+assistant-actuariel/
+├── src/
+│ ├── app.py # Application principale (3 fonctions)
+│ ├── chatbot_v1.py # Prototype initial sans mémoire
+│ ├── chatbot_v2.py # Prototype avec mémoire de conversation
+│ └── rag_test.py # Script de test du RAG en terminal
+├── docs/ # Document
+├── tests/ # Fichiers de test et observations
+├── .env # Clé API (non partagée)
+├── .gitignore
+└── README.md
+
+
+## INSTALLATION
+1. Cloner le projet
+2. Créer un fichier .env avec votre clé API Anthropic :
+   ANTHROPIC_API_KEY=votre-clé-ici
+3. Installer les dépendances :
+   pip install streamlit anthropic python-dotenv langchain 
+   langchain-community langchain-anthropic langchain-text-splitters 
+   langchain-huggingface langchain-core faiss-cpu pypdf 
+   sentence-transformers pandas openpyxl
+
+## COMMENT LANCER L'APPLICATION
+streamlit run src/app.py
+
+## LES 3 FONCTIONS
+- Fonction 1 : Expliquer les indicateurs actuariels (SCR, BEL, IBNR, 
+  ratio combiné...) via le LLM
+- Fonction 2 : Analyser des documents PDF/Excel via le RAG
+- Fonction 3 : Aider à la rédaction de reportings réglementaires 
+  (ORSA, SFCR) avec possibilité d'upload de données
+
+## LIMITES ET PERSPECTIVES D'ÉVOLUTION
+- Historique perdu au rechargement de la page (limitation Streamlit)
+- Gestion des tableaux dans les PDF non optimale
+- Recherche hybride BM25 + FAISS non implémentée
+- Pas de système d'authentification multi-utilisateurs
+- Perspective : persistance en base de données, déploiement cloud
+
+## HISTORIQUE DU DEELOPPEMENT 
 - Creation d'une clé API 
 - Securisation de la clé API 
 - structuration du projet en sous-dossiers (src,docs,tests)
