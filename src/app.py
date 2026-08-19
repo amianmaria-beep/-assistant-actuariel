@@ -97,6 +97,10 @@ if "documents_sauvegardes" not in st.session_state:
     st.session_state.documents_sauvegardes = {}
 if "question_predifinie" not in st.session_state:
     st.session_state.question_predifinie = None
+if "vectorstore_f3" not in st.session_state:
+    st.session_state.vectorstore_f3 = None
+if "fichiers_charges_f3" not in st.session_state:
+    st.session_state.fichiers_charges_f3 = []
 # Sidebar
 with st.sidebar:
     st.title("Assistant Actuariel")
@@ -188,7 +192,48 @@ with st.sidebar:
               st.caption(f"📄 {nom}")
         st.markdown("---")
 
-     # Bouton nouvelle conversation
+    if "Fonction 3" in fonction:
+        st.markdown("**Charger vos données (optionnel)**")
+        uploaded_files_f3 = st.file_uploader(
+            "Uploader un PDF ou Excel avec vos données",
+            type=["pdf", "xlsx", "xls"],
+            accept_multiple_files=True,
+            key="upload_f3"
+    )
+
+    if 'uploaded_files_f3' in dir() and uploaded_files_f3:
+        noms_f3 = [f.name for f in uploaded_files_f3]
+        if noms_f3 != st.session_state.get("fichiers_charges_f3", []):
+            with st.spinner("Chargement en cours..."):
+                all_chunks = []
+                for uploaded_file in uploaded_files_f3:
+                    with tempfile.NamedTemporaryFile(delete=False, suffix=f".{uploaded_file.name.split('.')[-1]}") as tmp:
+                        tmp.write(uploaded_file.read())
+                        tmp_path = tmp.name
+                    if uploaded_file.name.endswith((".xlsx", ".xls")):
+                        import pandas as pd
+                        df = pd.read_excel(tmp_path, sheet_name=None)
+                        texte_excel = ""
+                        for sheet_name, sheet_df in df.items():
+                            texte_excel += f"\n### Feuille : {sheet_name}\n"
+                            texte_excel += sheet_df.to_string(index=False)
+                        from langchain_core.documents import Document
+                        documents = [Document(page_content=texte_excel, metadata={"source": uploaded_file.name})]
+                    else:
+                        loader = PyPDFLoader(tmp_path)
+                        documents = loader.load()
+                    splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+                    chunks = splitter.split_documents(documents)
+                    all_chunks.extend(chunks)
+                embeddings = HuggingFaceEmbeddings(
+                    model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+                )
+                st.session_state.vectorstore_f3 = FAISS.from_documents(all_chunks, embeddings)
+                st.session_state.fichiers_charges_f3 = noms_f3
+                st.success("✓ Document(s) chargé(s) avec succès")
+    st.markdown("---")
+
+    # Bouton nouvelle conversation
     if st.button("✏️ Nouvelle conversation"):
         if st.session_state.messages:
             conv_id = st.session_state.conversation_id or datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -375,6 +420,15 @@ if prompt:
                 st.session_state.sources = docs_proches
                 messages_api = st.session_state.messages[:-1] + [
                     {"role": "user", "content": f"Contexte documentaire :\n{contexte}\n\nQuestion : {prompt}"}
+                ]
+            elif "Fonction 3" in st.session_state.fonction and st.session_state.vectorstore_f3:
+                docs_proches = st.session_state.vectorstore_f3.similarity_search(prompt, k=8)
+                contexte = "\n\n".join([
+                    f"[Source: {doc.metadata.get('source', 'Document')}]\n{doc.page_content}"
+                    for doc in docs_proches
+                ])
+                messages_api = st.session_state.messages[:-1] + [
+                    {"role": "user", "content": f"Données fournies :\n{contexte}\n\nDemande : {prompt}"}
                 ]
             else:
                 messages_api = st.session_state.messages

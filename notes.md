@@ -318,3 +318,8 @@ Permettre l'upload de plusieurs formats de fichiers en utilisant **pip install o
 
 ### Ajout export conversation
 - Bouton téléchargement de la conversation en .txt
+
+### Amélioration Fonction 3 - Reporting avec données
+- Upload PDF/Excel possible en Fonction 3
+- L'assistant génère un reporting basé sur les données fournies
+- Test réussi avec la table de mortalité TH 00-02
