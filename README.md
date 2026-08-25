@@ -9,18 +9,11 @@ Mise en place d'un assistant actuariel capable d'expliquer les indicateurs actua
 - Retrieval-Augmented Generation (RAG)
 - Streamlit 
 
-## STRUCTURE DU PROJET 
-assistant-actuariel/
-├── src/
-│ ├── app.py # Application principale (3 fonctions)
-│ ├── chatbot_v1.py # Prototype initial sans mémoire
-│ ├── chatbot_v2.py # Prototype avec mémoire de conversation
-│ └── rag_test.py # Script de test du RAG en terminal
-├── docs/ # Document
-├── tests/ # Fichiers de test et observations
-├── .env # Clé API (non partagée)
-├── .gitignore
-└── README.md
+## STRUCTURE DU PROJET
+- **src/** : code source principal (app.py, versions intermédiaires chatbot_v1, v2, rag)
+- **docs/** : documents actuariels utilisés pour les tests (PDF, Excel)
+- **tests/** : scripts de test et observations (rag_test.py, test_api.py, tests_api.md)
+- **notes.md** : journal de bord technique du projet
 
 
 ## INSTALLATION
