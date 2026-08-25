@@ -1,4 +1,3 @@
-
 # ASSISTANT ACTUARIEL IA
 # Prototype de stage — LLM + RAG + Streamlit
 
@@ -23,10 +22,10 @@ load_dotenv()
 def get_client():
     return anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
-#Configuration de la page 
+# Configuration de la page
 st.set_page_config(page_title="Assistant Actuariel", layout="wide")
 
-# CSS personnalisé 
+# CSS personnalisé
 st.markdown("""
 <style>
     [data-testid="stSidebar"] { background-color: #2E4A7A; }
@@ -51,7 +50,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-#  Initialisation du session_state 
+# Initialisation du session_state
 # Conserve les données entre les réexécutions Streamlit
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -60,7 +59,7 @@ if "vectorstore" not in st.session_state:
 if "vectorstore_f3" not in st.session_state:
     st.session_state.vectorstore_f3 = None
 if "fonction" not in st.session_state:
-    st.session_state.fonction = "Fonction 1 — Indicateurs actuariels"
+    st.session_state.fonction = "Fonction 1 - Indicateurs actuariels"
 if "fichiers_charges" not in st.session_state:
     st.session_state.fichiers_charges = []
 if "fichiers_charges_f3" not in st.session_state:
@@ -76,7 +75,7 @@ if "documents_sauvegardes" not in st.session_state:
 if "question_predifinie" not in st.session_state:
     st.session_state.question_predifinie = None
 
-#  Fonction d'indexation des documents 
+# Fonction d'indexation des documents
 def indexer_documents(uploaded_files):
     """
     Charge et indexe une liste de fichiers PDF ou Excel dans une base vectorielle FAISS.
@@ -114,7 +113,7 @@ def indexer_documents(uploaded_files):
     vectorstore = FAISS.from_documents(all_chunks, embeddings)
     return vectorstore, all_chunks
 
-#  Sidebar 
+# Sidebar
 with st.sidebar:
     st.title("Assistant Actuariel")
     st.markdown("---")
@@ -125,16 +124,17 @@ with st.sidebar:
     # Sélecteur de fonction
     st.markdown("**Choisir une fonction**")
     fonction = st.radio("", [
-        "Fonction 1 — Indicateurs actuariels",
-        "Fonction 2 — Analyse de documents",
-        "Fonction 3 — Aide au reporting"
+        "Fonction 1 - Indicateurs actuariels",
+        "Fonction 2 - Analyse de documents",
+        "Fonction 3 - Aide au reporting"
     ])
 
     # Badge mode actif
+    mode_actif = fonction.split("-")[1].strip()
     st.markdown(f"""
     <div style='background-color:#C9A84C;color:white;padding:6px 12px;
     border-radius:8px;font-size:13px;font-weight:500;margin-top:5px;'>
-    Mode actif : {fonction.split("—")[1].strip()}
+    Mode actif : {mode_actif}
     </div>
     """, unsafe_allow_html=True)
 
@@ -254,24 +254,24 @@ with st.sidebar:
                 st.rerun()
 
     st.markdown("---")
-    st.caption("Projet de stage — Juillet 2026")
+    st.caption("Projet de stage (juin - Juillet 2026)")
 
-# ── Prompts système par fonction ──────────────────────────
+# Prompts système par fonction
 prompts = {
-    "Fonction 1 — Indicateurs actuariels": """Tu es un assistant actuariel expert destiné aux actuaires et étudiants en actuariat.
+    "Fonction 1 - Indicateurs actuariels": """Tu es un assistant actuariel expert destiné aux actuaires et étudiants en actuariat.
 Tu expliques les indicateurs actuariels (SCR, BEL, IBNR, ratio combiné, S/P, prime pure, MCR, ROE, RORAC...).
 Pour chaque indicateur : définition courte, formule si applicable, exemple chiffré concret.
 Tu es courtois, professionnel, sans emojis.
 Tu cites toujours tes sources (EIOPA, ACPR, Institut des Actuaires).
 Tu ne dois jamais inventer de chiffres ou de faits.""",
 
-    "Fonction 2 — Analyse de documents": """Tu es un assistant actuariel expert en analyse de documents.
+    "Fonction 2 - Analyse de documents": """Tu es un assistant actuariel expert en analyse de documents.
 Quand un contexte documentaire est fourni, tu bases ta réponse sur ce contexte en priorité.
 Tu indiques toujours que l'information provient du document chargé.
 Si la réponse n'est pas dans le contexte, tu le dis clairement sans inventer.
 Tu es courtois, professionnel, sans emojis, en français.""",
 
-    "Fonction 3 — Aide au reporting": """Tu es un assistant actuariel expert en reportings réglementaires.
+    "Fonction 3 - Aide au reporting": """Tu es un assistant actuariel expert en reportings réglementaires.
 Tu aides à rédiger des sections de rapports ORSA, SFCR et autres reportings Solvabilité II.
 Quand des données sont fournies, tu les utilises pour rédiger un reporting précis et chiffré.
 Tu proposes des formulations professionnelles conformes aux exigences réglementaires.
@@ -279,14 +279,14 @@ Tu signales toujours quand une validation par un actuaire qualifié est nécessa
 Tu es courtois, professionnel, sans emojis, en français."""
 }
 
-# Titre et message de bienvenue 
+# Titre et message de bienvenue
 heure = datetime.now().hour
 salutation = "Bonjour" if heure < 12 else "Bon après-midi" if heure < 18 else "Bonsoir"
 
 descriptions = {
-    "Fonction 1 — Indicateurs actuariels": "Posez vos questions sur les indicateurs actuariels : SCR, BEL, IBNR, ratio combiné, prime pure...",
-    "Fonction 2 — Analyse de documents": "Chargez un ou plusieurs PDF/Excel dans la sidebar et posez vos questions sur leur contenu.",
-    "Fonction 3 — Aide au reporting": "Chargez vos données (optionnel) et décrivez la section de reporting que vous souhaitez rédiger."
+    "Fonction 1 - Indicateurs actuariels": "Posez vos questions sur les indicateurs actuariels : SCR, BEL, IBNR, ratio combiné, prime pure...",
+    "Fonction 2 - Analyse de documents": "Chargez un ou plusieurs PDF/Excel dans la sidebar et posez vos questions sur leur contenu.",
+    "Fonction 3 - Aide au reporting": "Chargez vos données (optionnel) et décrivez la section de reporting que vous souhaitez rédiger."
 }
 
 st.markdown("""
@@ -302,20 +302,20 @@ border-radius:10px;margin-bottom:20px;'>
 </div>
 """, unsafe_allow_html=True)
 
-# Questions prédéfinies 
+# Questions prédéfinies
 questions_predefinies = {
-    "Fonction 1 — Indicateurs actuariels": [
+    "Fonction 1 - Indicateurs actuariels": [
         "Explique-moi le SCR",
         "C'est quoi le Best Estimate ?",
         "Comment calculer le ratio combiné ?",
         "C'est quoi l'IBNR ?"
     ],
-    "Fonction 2 — Analyse de documents": [
+    "Fonction 2 - Analyse de documents": [
         "Fais un résumé de ce document",
         "Quels sont les chiffres clés ?",
         "Quelles sont les conclusions principales ?"
     ],
-    "Fonction 3 — Aide au reporting": [
+    "Fonction 3 - Aide au reporting": [
         "Rédige une introduction ORSA",
         "Aide-moi à rédiger la section risques du SFCR",
         "Quelles sont les exigences réglementaires ORSA ?"
@@ -329,7 +329,7 @@ for i, question in enumerate(questions_predefinies[st.session_state.fonction]):
         if st.button(question, key=f"q_{i}"):
             st.session_state.question_predifinie = question
 
-#  Zone de saisie 
+# Zone de saisie
 prompt = st.chat_input("Votre question :")
 
 # Si une question prédéfinie a été cliquée, elle prend le dessus
@@ -337,7 +337,7 @@ if st.session_state.get("question_predifinie"):
     prompt = st.session_state.question_predifinie
     st.session_state.question_predifinie = None
 
-#  Traitement de la question et appel API 
+# Traitement de la question et appel API
 if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
 
@@ -398,7 +398,6 @@ if prompt:
                     'messages': st.session_state.messages.copy(),
                     'fonction': st.session_state.fonction
                 }
-
         except anthropic.AuthenticationError:
             st.error("Clé API invalide. Vérifiez votre fichier .env")
         except anthropic.APIConnectionError:
@@ -408,12 +407,12 @@ if prompt:
         except Exception as e:
             st.error(f"Erreur inattendue : {e}")
 
-#  Affichage de la conversation 
+# Affichage de la conversation
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-#  Sources utilisées (Fonction 2 uniquement) 
+# Sources utilisées (Fonction 2 uniquement)
 if "Fonction 2" in st.session_state.fonction and st.session_state.get("sources"):
     with st.expander("📄 Voir les extraits utilisés pour cette réponse"):
         for i, doc in enumerate(st.session_state.sources):
@@ -421,7 +420,7 @@ if "Fonction 2" in st.session_state.fonction and st.session_state.get("sources")
             st.text(doc.page_content[:300])
             st.markdown("---")
 
-#  Export de la conversation 
+# Export de la conversation
 if st.session_state.messages:
     conversation_texte = ""
     for msg in st.session_state.messages:
